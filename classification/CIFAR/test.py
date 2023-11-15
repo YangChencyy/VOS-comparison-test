@@ -61,10 +61,10 @@ std = [x / 255 for x in [63.0, 62.1, 66.7]]
 test_transform = trn.Compose([trn.ToTensor(), trn.Normalize(mean, std)])
 
 if 'cifar10_' in args.method_name:
-    test_data = dset.CIFAR10('/nobackup-slow/dataset/cifarpy', train=False, transform=test_transform)
+    test_data = dset.CIFAR10('/nobackup-slow/dataset/cifarpy', train=False, transform=test_transform, download=True)
     num_classes = 10
 else:
-    test_data = dset.CIFAR100('/nobackup-slow/dataset/cifarpy', train=False, transform=test_transform)
+    test_data = dset.CIFAR100('/nobackup-slow/dataset/cifarpy', train=False, transform=test_transform, download=True)
     num_classes = 100
 
 
@@ -254,7 +254,7 @@ get_and_print_results(ood_loader)
 ood_data = svhn.SVHN(root='/nobackup-slow/dataset/svhn/', split="test",
                      transform=trn.Compose(
                          [#trn.Resize(32),
-                         trn.ToTensor(), trn.Normalize(mean, std)]), download=False)
+                         trn.ToTensor(), trn.Normalize(mean, std)]), download=True)
 ood_loader = torch.utils.data.DataLoader(ood_data, batch_size=args.test_bs, shuffle=True,
                                          num_workers=2, pin_memory=True)
 print('\n\nSVHN Detection')
