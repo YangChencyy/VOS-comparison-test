@@ -168,8 +168,8 @@ def get_ood_scores(loader, in_dist=False):
 
             data = data.cuda()
 
-            output = net(data)
-            smax = to_np(F.softmax(output, dim=1))
+            smax, output = net(data)
+            # smax = to_np(F.softmax(output, dim=1))
 
             if args.use_xent:
                 _score.append(to_np((output.mean(1) - torch.logsumexp(output, dim=1))))
