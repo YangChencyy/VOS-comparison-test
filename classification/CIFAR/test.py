@@ -16,6 +16,9 @@ from models.densenet import DenseNet3
 from skimage.filters import gaussian as gblur
 from PIL import Image as PILImage
 
+from dataset import *
+from models.model_GP import MNIST_Net, Fashion_MNIST_Net, Cifar_10_Net, BasicBlock, resnet18, load_part
+
 # go through rigamaroo to do ...utils.display_results import show_performance
 if __package__ is None:
     import sys
@@ -49,59 +52,89 @@ parser.add_argument('--T', default=1., type=float, help='temperature: energy|Odi
 parser.add_argument('--noise', type=float, default=0, help='noise for Odin')
 parser.add_argument('--model_name', default='res', type=str)
 
+## Dataset (new)
+parser.add_argument("InD_Dataset", type=str, help="The name of the InD dataset.")
+parser.add_argument("train_batch_size", type=int, default=128, help="train_batch_size")
+parser.add_argument("test_batch_size", type=int, default=128, help="test_batch_size")
+
+num_classes = 10
+
+data_dic = {
+    'MNIST': MNIST_dataset,
+    'FashionMNIST': Fashion_MNIST_dataset, 
+    'Cifar_10': Cifar_10_dataset,
+    'SVHN': SVHN_dataset, 
+    'Imagenet_r': TinyImagenet_r_dataset,
+    'Imagenet_c': TinyImagenet_c_dataset
+}
+
+data_model = {
+    'MNIST': MNIST_Net,
+    'FashionMNIST': Fashion_MNIST_Net, 
+    'Cifar_10': Cifar_10_Net   
+}
+
 args = parser.parse_args()
 print(args)
 # torch.manual_seed(1)
 # np.random.seed(1)
 
-# mean and standard deviation of channels of CIFAR-10 images
-mean = [x / 255 for x in [125.3, 123.0, 113.9]]
-std = [x / 255 for x in [63.0, 62.1, 66.7]]
+# # mean and standard deviation of channels of CIFAR-10 images
+# mean = [x / 255 for x in [125.3, 123.0, 113.9]]
+# std = [x / 255 for x in [63.0, 62.1, 66.7]]
 
-test_transform = trn.Compose([trn.ToTensor(), trn.Normalize(mean, std)])
+# test_transform = trn.Compose([trn.ToTensor(), trn.Normalize(mean, std)])
 
-if 'cifar10_' in args.method_name:
-    test_data = dset.CIFAR10('./data/cifar10', train=False, transform=test_transform, download=True)
-    num_classes = 10
-else:
-    test_data = dset.CIFAR100('/nobackup-slow/dataset/cifarpy', train=False, transform=test_transform, download=True)
-    num_classes = 100
+# if 'cifar10_' in args.method_name:
+#     test_data = dset.CIFAR10('./data/cifar10', train=False, transform=test_transform, download=True)
+#     num_classes = 10
+# else:
+#     test_data = dset.CIFAR100('/nobackup-slow/dataset/cifarpy', train=False, transform=test_transform, download=True)
+#     num_classes = 100
 
 
-test_loader = torch.utils.data.DataLoader(test_data, batch_size=args.test_bs, shuffle=False,
-                                          num_workers=args.prefetch, pin_memory=True)
+# test_loader = torch.utils.data.DataLoader(test_data, batch_size=args.test_bs, shuffle=False,
+#                                           num_workers=args.prefetch, pin_memory=True)
 
-# Create model
-if args.model_name == 'res':
-    net = WideResNet(args.layers, num_classes, args.widen_factor, dropRate=args.droprate)
-else:
-    net = DenseNet3(100, num_classes, 12, reduction=0.5, bottleneck=True, dropRate=0.0, normalizer=None,
-                         k=None, info=None)
-start_epoch = 0
+train_set, test_data, trloader, test_loader = data_dic[args.InD_Dataset](batch_size = args.train_batch_size, 
+                                                                test_batch_size = args.test_batch_size)
 
-# Restore model
-if args.load != '':
-    for i in range(1000 - 1, -1, -1):
-        if 'pretrained' in args.method_name:
-            subdir = 'pretrained'
-        elif 'oe_tune' in args.method_name:
-            subdir = 'oe_tune'
-        elif 'energy_ft' in args.method_name:
-            subdir = 'energy_ft'
-        elif 'baseline' in args.method_name:
-            subdir = 'baseline'
-        else:
-            subdir = 'oe_scratch'
+net = data_model[args.InD_Dataset]
+net.load_state_dict(torch.load(args.InD_Dataset + '_net.pt'))
+
+
+
+# # Create model
+# if args.model_name == 'res':
+#     net = WideResNet(args.layers, num_classes, args.widen_factor, dropRate=args.droprate)
+# else:
+#     net = DenseNet3(100, num_classes, 12, reduction=0.5, bottleneck=True, dropRate=0.0, normalizer=None,
+#                          k=None, info=None)
+# start_epoch = 0
+
+# # Restore model
+# if args.load != '':
+#     for i in range(1000 - 1, -1, -1):
+#         if 'pretrained' in args.method_name:
+#             subdir = 'pretrained'
+#         elif 'oe_tune' in args.method_name:
+#             subdir = 'oe_tune'
+#         elif 'energy_ft' in args.method_name:
+#             subdir = 'energy_ft'
+#         elif 'baseline' in args.method_name:
+#             subdir = 'baseline'
+#         else:
+#             subdir = 'oe_scratch'
         
-        model_name = os.path.join(os.path.join(args.load, subdir), args.method_name + '_epoch_' + str(i) + '.pt')
-        # model_name = os.path.join(os.path.join(args.load, subdir), args.method_name + '.pt')
-        if os.path.isfile(model_name):
-            net.load_state_dict(torch.load(model_name))
-            print('Model restored! Epoch:', i)
-            start_epoch = i + 1
-            break
-    if start_epoch == 0:
-        assert False, "could not resume "+model_name
+#         model_name = os.path.join(os.path.join(args.load, subdir), args.method_name + '_epoch_' + str(i) + '.pt')
+#         # model_name = os.path.join(os.path.join(args.load, subdir), args.method_name + '.pt')
+#         if os.path.isfile(model_name):
+#             net.load_state_dict(torch.load(model_name))
+#             print('Model restored! Epoch:', i)
+#             start_epoch = i + 1
+#             break
+#     if start_epoch == 0:
+#         assert False, "could not resume "+model_name
 
 net.eval()
 

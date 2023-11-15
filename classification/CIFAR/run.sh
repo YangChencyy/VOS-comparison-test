@@ -1,4 +1,5 @@
-methods=(pretrained oe_tune)
+# methods=(pretrained oe_tune)
+methods=(baseline) 
 data_models=(cifar10_wrn cifar100_wrn)
 gpu=0
 
