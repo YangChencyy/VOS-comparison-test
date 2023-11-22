@@ -109,8 +109,9 @@ def TinyImagenet_r_dataset(batch_size, test_batch_size, into_grey = False):
                                         # transforms.Normalize((0.5,), (0.5,))
                                         ])
     
-    train_datasets = datasets.ImageFolder(os.path.join('./data/tiny-imagenet-200', 'train'), transform=transform) 
-    train_loader = torch.utils.data.DataLoader(train_datasets, batch_size=batch_size, shuffle=True)
+    # train_datasets = datasets.ImageFolder(os.path.join('./data/tiny-imagenet-200', 'train'), transform=transform) 
+    # train_loader = torch.utils.data.DataLoader(train_datasets, batch_size=batch_size, shuffle=True)
+    train_datasets, train_loader = None, None
     
     test_datasets = datasets.ImageFolder(os.path.join('./data/tiny-imagenet-200', 'test'), transform=transform) 
     test_loader = torch.utils.data.DataLoader(test_datasets, batch_size=test_batch_size, shuffle=True)
@@ -131,8 +132,9 @@ def TinyImagenet_c_dataset(batch_size, test_batch_size, into_grey = False):
                                         # transforms.Normalize((0.5,), (0.5,))
                                         ])
     
-    train_datasets = datasets.ImageFolder(os.path.join('./data/tiny-imagenet-200', 'train'), transform=transform) 
-    train_loader = torch.utils.data.DataLoader(train_datasets, batch_size=batch_size, shuffle=True)
+    # train_datasets = datasets.ImageFolder(os.path.join('./data/tiny-imagenet-200', 'train'), transform=transform) 
+    # train_loader = torch.utils.data.DataLoader(train_datasets, batch_size=batch_size, shuffle=True)
+    train_datasets, train_loader = None, None
     
     test_datasets = datasets.ImageFolder(os.path.join('./data/tiny-imagenet-200', 'test'), transform=transform) 
     test_loader = torch.utils.data.DataLoader(test_datasets, batch_size=test_batch_size, shuffle=True)
