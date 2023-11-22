@@ -37,11 +37,15 @@ def fpr_and_fdr_at_recall(y_true, y_score, recall_level=recall_level_default, po
 
     # make y_true a boolean vector
     y_true = (y_true == pos_label)
+    l1 = np.sum(y_true)
 
     # sort scores and corresponding truth values
     desc_score_indices = np.argsort(y_score, kind="mergesort")[::-1]
     y_score = y_score[desc_score_indices]
     y_true = y_true[desc_score_indices]
+    l = len(y_true)
+    print("first half:", np.sum(y_true[0:l1]))
+    print("second half:", np.sum(y_true[l1:l-1]))
 
     # y_score typically has many tied values. Here we extract
     # the indices associated with the distinct values. We also
@@ -50,12 +54,12 @@ def fpr_and_fdr_at_recall(y_true, y_score, recall_level=recall_level_default, po
     threshold_idxs = np.r_[distinct_value_indices, y_true.size - 1]
 
     # accumulate the true positives with decreasing threshold
-    tps = stable_cumsum(y_true)[threshold_idxs]
+    tps = stable_cumsum(y_true)[threshold_idxs]   # cy: count number of 1
     fps = 1 + threshold_idxs - tps      # add one because of zero-based indexing
 
     thresholds = y_score[threshold_idxs]
-
-    recall = tps / tps[-1]
+ 
+    recall = tps / tps[-1]   
 
     last_ind = tps.searchsorted(tps[-1])
     sl = slice(last_ind, None, -1)      # [last_ind::-1]
