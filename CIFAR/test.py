@@ -99,7 +99,7 @@ print(args)
 train_set, test_data, trloader, test_loader = data_dic[args.InD_Dataset](batch_size = args.train_batch_size, 
                                                                 test_batch_size = args.test_batch_size)
 
-net = data_model[args.InD_Dataset]
+net = data_model[args.InD_Dataset]()
 net.load_state_dict(torch.load(args.InD_Dataset + '_net.pt'))
 
 
