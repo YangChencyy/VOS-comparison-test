@@ -19,6 +19,9 @@ from PIL import Image as PILImage
 from dataset import *
 from models.model_GP import MNIST_Net, Fashion_MNIST_Net, Cifar_10_Net, BasicBlock, resnet18, load_part
 
+import warnings
+warnings.filterwarnings("ignore")
+
 # go through rigamaroo to do ...utils.display_results import show_performance
 if __package__ is None:
     import sys
