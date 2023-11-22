@@ -155,6 +155,8 @@ expected_ap = ood_num_examples / (ood_num_examples + len(test_data))
 concat = lambda x: np.concatenate(x, axis=0)
 to_np = lambda x: x.data.cpu().numpy()
 
+print("use_xent", args.use_xent)
+
 
 def get_ood_scores(loader, in_dist=False):
     _score = []
@@ -168,7 +170,7 @@ def get_ood_scores(loader, in_dist=False):
 
             data = data.cuda()
 
-            smax, output = net(data)
+            output, smax = net(data)
             # smax = to_np(F.softmax(output, dim=1))
 
             if args.use_xent:
