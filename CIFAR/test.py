@@ -182,7 +182,7 @@ def get_ood_scores(loader, in_dist=False):
                     
                     _score.append(-to_np((args.T*torch.logsumexp(output / args.T, dim=1))))
                 else: # original MSP and Mahalanobis (but Mahalanobis won't need this returned)
-                    print(smax.shape)
+                    # print(smax.shape)
                     _score.append(-np.max(smax, axis=1))
 
             if in_dist:
@@ -202,6 +202,7 @@ def get_ood_scores(loader, in_dist=False):
         return concat(_score).copy(), concat(_right_score).copy(), concat(_wrong_score).copy()
     else:
         return concat(_score)[:ood_num_examples].copy()
+
 if args.score == 'Odin':
     # separated because no grad is not applied
     in_score, right_score, wrong_score = lib.get_ood_scores_odin(test_loader, net, args.test_bs, ood_num_examples, args.T, args.noise, in_dist=True)
@@ -280,57 +281,75 @@ def get_and_print_results(ood_loader, num_to_avg=args.num_to_avg):
         print_measures(auroc, aupr, fpr, args.method_name)
 
 
-# /////////////// Textures ///////////////
-ood_data = dset.ImageFolder(root="/nobackup-slow/dataset/dtd/images",
-                            transform=trn.Compose([trn.Resize(32), trn.CenterCrop(32),
-                                                   trn.ToTensor(), trn.Normalize(mean, std)]))
-ood_loader = torch.utils.data.DataLoader(ood_data, batch_size=args.test_bs, shuffle=True,
-                                         num_workers=4, pin_memory=True)
-print('\n\nTexture Detection')
-get_and_print_results(ood_loader)
 
-# /////////////// SVHN /////////////// # cropped and no sampling of the test set
-ood_data = svhn.SVHN(root='/nobackup-slow/dataset/svhn/', split="test",
-                     transform=trn.Compose(
-                         [#trn.Resize(32),
-                         trn.ToTensor(), trn.Normalize(mean, std)]), download=True)
-ood_loader = torch.utils.data.DataLoader(ood_data, batch_size=args.test_bs, shuffle=True,
-                                         num_workers=2, pin_memory=True)
-print('\n\nSVHN Detection')
-get_and_print_results(ood_loader)
+grey = True
+if args.InD_Dataset == 'Cifar_10':
+    OOD_Dataset = ['SVHN', 'Imagenet_r', 'Imagenet_c']
+    grey = False
+else:
+    if args.InD_Dataset == 'MNIST':
+        OOD_Dataset = ['FashionMNIST', 'Cifar_10', 'SVHN', 'Imagenet_r', 'Imagenet_c']
+    elif args.InD_Dataset == 'FashionMNIST':
+        OOD_Dataset = ['MNIST', 'Cifar_10', 'SVHN', 'Imagenet_r', 'Imagenet_c']
 
-# /////////////// Places365 ///////////////
-ood_data = dset.ImageFolder(root="/nobackup-slow/dataset/places365/",
-                            transform=trn.Compose([trn.Resize(32), trn.CenterCrop(32),
-                                                   trn.ToTensor(), trn.Normalize(mean, std)]))
-ood_loader = torch.utils.data.DataLoader(ood_data, batch_size=args.test_bs, shuffle=True,
-                                         num_workers=2, pin_memory=True)
-print('\n\nPlaces365 Detection')
-get_and_print_results(ood_loader)
+for dataset in OOD_Dataset:
+    _, OOD_set, _, OODloader = data_dic[dataset](batch_size = args.train_batch_size, 
+                                                test_batch_size = args.test_batch_size, into_grey = grey)
+    print('\n\n' + dataset)
+    get_and_print_results(OODloader)
 
-# /////////////// LSUN-C ///////////////
-ood_data = dset.ImageFolder(root="/nobackup-slow/dataset/LSUN_C",
-                            transform=trn.Compose([trn.ToTensor(), trn.Normalize(mean, std)]))
-ood_loader = torch.utils.data.DataLoader(ood_data, batch_size=args.test_bs, shuffle=True,
-                                         num_workers=1, pin_memory=True)
-print('\n\nLSUN_C Detection')
-get_and_print_results(ood_loader)
 
-# /////////////// LSUN-R ///////////////
-ood_data = dset.ImageFolder(root="/nobackup-slow/dataset/LSUN_resize",
-                            transform=trn.Compose([trn.ToTensor(), trn.Normalize(mean, std)]))
-ood_loader = torch.utils.data.DataLoader(ood_data, batch_size=args.test_bs, shuffle=True,
-                                         num_workers=1, pin_memory=True)
-print('\n\nLSUN_Resize Detection')
-get_and_print_results(ood_loader)
+# # /////////////// Textures ///////////////
+# ood_data = dset.ImageFolder(root="/nobackup-slow/dataset/dtd/images",
+#                             transform=trn.Compose([trn.Resize(32), trn.CenterCrop(32),
+#                                                    trn.ToTensor(), trn.Normalize(mean, std)]))
+# ood_loader = torch.utils.data.DataLoader(ood_data, batch_size=args.test_bs, shuffle=True,
+#                                          num_workers=4, pin_memory=True)
+# print('\n\nTexture Detection')
+# get_and_print_results(ood_loader)
 
-# /////////////// iSUN ///////////////
-ood_data = dset.ImageFolder(root="/nobackup-slow/dataset/iSUN",
-                            transform=trn.Compose([trn.ToTensor(), trn.Normalize(mean, std)]))
-ood_loader = torch.utils.data.DataLoader(ood_data, batch_size=args.test_bs, shuffle=True,
-                                         num_workers=1, pin_memory=True)
-print('\n\niSUN Detection')
-get_and_print_results(ood_loader)
+# # /////////////// SVHN /////////////// # cropped and no sampling of the test set
+# ood_data = svhn.SVHN(root='/nobackup-slow/dataset/svhn/', split="test",
+#                      transform=trn.Compose(
+#                          [#trn.Resize(32),
+#                          trn.ToTensor(), trn.Normalize(mean, std)]), download=True)
+# ood_loader = torch.utils.data.DataLoader(ood_data, batch_size=args.test_bs, shuffle=True,
+#                                          num_workers=2, pin_memory=True)
+# print('\n\nSVHN Detection')
+# get_and_print_results(ood_loader)
+
+# # /////////////// Places365 ///////////////
+# ood_data = dset.ImageFolder(root="/nobackup-slow/dataset/places365/",
+#                             transform=trn.Compose([trn.Resize(32), trn.CenterCrop(32),
+#                                                    trn.ToTensor(), trn.Normalize(mean, std)]))
+# ood_loader = torch.utils.data.DataLoader(ood_data, batch_size=args.test_bs, shuffle=True,
+#                                          num_workers=2, pin_memory=True)
+# print('\n\nPlaces365 Detection')
+# get_and_print_results(ood_loader)
+
+# # /////////////// LSUN-C ///////////////
+# ood_data = dset.ImageFolder(root="/nobackup-slow/dataset/LSUN_C",
+#                             transform=trn.Compose([trn.ToTensor(), trn.Normalize(mean, std)]))
+# ood_loader = torch.utils.data.DataLoader(ood_data, batch_size=args.test_bs, shuffle=True,
+#                                          num_workers=1, pin_memory=True)
+# print('\n\nLSUN_C Detection')
+# get_and_print_results(ood_loader)
+
+# # /////////////// LSUN-R ///////////////
+# ood_data = dset.ImageFolder(root="/nobackup-slow/dataset/LSUN_resize",
+#                             transform=trn.Compose([trn.ToTensor(), trn.Normalize(mean, std)]))
+# ood_loader = torch.utils.data.DataLoader(ood_data, batch_size=args.test_bs, shuffle=True,
+#                                          num_workers=1, pin_memory=True)
+# print('\n\nLSUN_Resize Detection')
+# get_and_print_results(ood_loader)
+
+# # /////////////// iSUN ///////////////
+# ood_data = dset.ImageFolder(root="/nobackup-slow/dataset/iSUN",
+#                             transform=trn.Compose([trn.ToTensor(), trn.Normalize(mean, std)]))
+# ood_loader = torch.utils.data.DataLoader(ood_data, batch_size=args.test_bs, shuffle=True,
+#                                          num_workers=1, pin_memory=True)
+# print('\n\niSUN Detection')
+# get_and_print_results(ood_loader)
 
 # /////////////// Mean Results ///////////////
 
