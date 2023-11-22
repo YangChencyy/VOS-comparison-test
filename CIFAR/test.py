@@ -171,6 +171,7 @@ def get_ood_scores(loader, in_dist=False):
             data = data.cuda()
 
             output, smax = net(data)
+            output = smax
             # smax = to_np(F.softmax(output, dim=1))
 
             if args.use_xent:
