@@ -178,8 +178,10 @@ def get_ood_scores(loader, in_dist=False):
                 _score.append(to_np((output.mean(1) - torch.logsumexp(output, dim=1))))
             else:
                 if args.score == 'energy':
+                    
                     _score.append(-to_np((args.T*torch.logsumexp(output / args.T, dim=1))))
                 else: # original MSP and Mahalanobis (but Mahalanobis won't need this returned)
+                    print(smax.shape)
                     _score.append(-np.max(smax, axis=1))
 
             if in_dist:
