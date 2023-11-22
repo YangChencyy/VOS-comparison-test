@@ -37,13 +37,13 @@ def fpr_and_fdr_at_recall(y_true, y_score, recall_level=recall_level_default, po
 
     # make y_true a boolean vector
     y_true = (y_true == pos_label)
-    l1 = np.sum(y_true)
+    l1 = np.sum(y_true) # cy
 
     # sort scores and corresponding truth values
     desc_score_indices = np.argsort(y_score, kind="mergesort")[::-1]
     y_score = y_score[desc_score_indices]
     y_true = y_true[desc_score_indices]
-    l = len(y_true)
+    l = len(y_true) # cy
     print("first half:", np.sum(y_true[0:l1]))
     print("second half:", np.sum(y_true[l1:l-1]))
 
