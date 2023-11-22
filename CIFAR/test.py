@@ -53,7 +53,7 @@ parser.add_argument('--noise', type=float, default=0, help='noise for Odin')
 parser.add_argument('--model_name', default='res', type=str)
 
 ## Dataset (new)
-parser.add_argument("--InD_Dataset", default='MNIST', type=str, help="The name of the InD dataset.")
+parser.add_argument("--InD_Dataset", default='FashionMNIST', type=str, help="The name of the InD dataset.")
 parser.add_argument("--train_batch_size", default=128, type=int, help="train_batch_size")
 parser.add_argument("--test_batch_size", default=128, type=int, help="test_batch_size")
 
