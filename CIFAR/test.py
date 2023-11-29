@@ -223,7 +223,11 @@ elif args.score == 'M':
     #                                       num_workers=args.prefetch, pin_memory=True)
     num_batches = ood_num_examples // args.test_bs
 
-    temp_x = torch.rand(2,3,32,32)
+    if args.InD_Dataset == 'Cifar_10':
+        temp_x = torch.rand(2,3,32,32)
+    else:
+        temp_x = torch.rand(2,1,28,28)  
+    # temp_x = torch.rand(2,3,32,32)
     temp_x = Variable(temp_x)
     temp_x = temp_x.cuda()
     temp_list = net.feature_list(temp_x)[1]

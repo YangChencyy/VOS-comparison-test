@@ -6,4 +6,4 @@ noise: 0 0.0004 0.0008 0.0014 0.002 0.0024 0.0028 0.0032 0.0038 0.0048
 python test.py --InD_Dataset MNIST --method_name ODIN --score Odin --T 100 --noise 0.002
 
 
---InD_Dataset MNIST 
+python test.py --InD_Dataset MNIST --method_name Mahalanobis --score M --noise 0.01 -v
