@@ -85,7 +85,12 @@ def ODIN(inputs, outputs, model, temper, noiseMagnitude1, dataName = "MNIST"):
 
     # Adding small perturbations to images
     tempInputs = torch.add(inputs.data,  -noiseMagnitude1, gradient)
-    outputs = model(Variable(tempInputs))
+    # outputs = model(Variable(tempInputs))
+    if dataName == 'Cifar_10':
+            outputs = model(Variable(tempInputs))
+    else:
+        _, outputs = model(Variable(tempInputs))
+        
     outputs = outputs / temper
     # Calculating the confidence after adding perturbations
     nnOutputs = outputs.data.cpu()
