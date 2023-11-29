@@ -22,6 +22,8 @@ from models.model_GP import MNIST_Net, Fashion_MNIST_Net, Cifar_10_Net, BasicBlo
 import warnings
 warnings.filterwarnings("ignore")
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 # go through rigamaroo to do ...utils.display_results import show_performance
 if __package__ is None:
     import sys
@@ -145,7 +147,7 @@ if args.ngpu > 1:
     net = torch.nn.DataParallel(net, device_ids=list(range(args.ngpu)))
 
 if args.ngpu > 0:
-    net.cuda()
+    net.to(device)
     # torch.cuda.manual_seed(1)
 
 cudnn.benchmark = True  # fire on all cylinders
@@ -171,7 +173,7 @@ def get_ood_scores(loader, in_dist=False):
             if batch_idx >= ood_num_examples // args.test_bs and in_dist is False:
                 break
 
-            data = data.cuda()
+            data = data.to(device)
 
             output, smax = net(data)
             output = smax
@@ -229,7 +231,7 @@ elif args.score == 'M':
         temp_x = torch.rand(2,1,28,28)  
     # temp_x = torch.rand(2,3,32,32)
     temp_x = Variable(temp_x)
-    temp_x = temp_x.cuda()
+    temp_x = temp_x.to(device)
     temp_list = net.feature_list(temp_x)[1]
     num_output = len(temp_list)
     feature_list = np.empty(num_output)

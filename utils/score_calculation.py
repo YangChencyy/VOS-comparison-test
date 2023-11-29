@@ -253,5 +253,5 @@ def sample_estimator(model, num_classes, feature_list, train_loader):
         precision.append(temp_precision)
         
     print('\n Training Accuracy:({:.2f}%)\n'.format(100. * correct / total))
-    breakpoint()
+    # breakpoint()
     return sample_class_mean, precision
