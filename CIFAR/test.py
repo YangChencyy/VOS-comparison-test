@@ -99,7 +99,7 @@ print(args)
 # test_loader = torch.utils.data.DataLoader(test_data, batch_size=args.test_bs, shuffle=False,
 #                                           num_workers=args.prefetch, pin_memory=True)
 
-train_set, test_data, trloader, test_loader = data_dic[args.InD_Dataset](batch_size = args.train_batch_size, 
+train_set, test_data, train_loader, test_loader = data_dic[args.InD_Dataset](batch_size = args.train_batch_size, 
                                                                 test_batch_size = args.test_batch_size)
 
 net = data_model[args.InD_Dataset]()
@@ -214,13 +214,13 @@ elif args.score == 'M':
     _, right_score, wrong_score = get_ood_scores(test_loader, in_dist=True)
 
 
-    if 'cifar10_' in args.method_name:
-        train_data = dset.CIFAR10('/nobackup-slow/dataset/cifarpy', train=True, transform=test_transform)
-    else:
-        train_data = dset.CIFAR100('/nobackup-slow/dataset/cifarpy', train=True, transform=test_transform)
+    # if 'cifar10_' in args.method_name:
+    #     train_data = dset.CIFAR10('/nobackup-slow/dataset/cifarpy', train=True, transform=test_transform)
+    # else:
+    #     train_data = dset.CIFAR100('/nobackup-slow/dataset/cifarpy', train=True, transform=test_transform)
 
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size=args.test_bs, shuffle=False, 
-                                          num_workers=args.prefetch, pin_memory=True)
+    # train_loader = torch.utils.data.DataLoader(train_data, batch_size=args.test_bs, shuffle=False, 
+    #                                       num_workers=args.prefetch, pin_memory=True)
     num_batches = ood_num_examples // args.test_bs
 
     temp_x = torch.rand(2,3,32,32)
@@ -247,7 +247,7 @@ print('Error Rate {:.2f}'.format(100 * num_wrong / (num_wrong + num_right)))
 
 # /////////////// End Detection Prelims ///////////////
 
-print('\nUsing CIFAR-10 as typical data') if num_classes == 10 else print('\nUsing CIFAR-100 as typical data')
+# print('\nUsing CIFAR-10 as typical data') if num_classes == 10 else print('\nUsing CIFAR-100 as typical data')
 
 # /////////////// Error Detection ///////////////
 
