@@ -208,7 +208,7 @@ def get_ood_scores(loader, in_dist=False):
 
 if args.score == 'Odin':
     # separated because no grad is not applied
-    in_score, right_score, wrong_score = lib.get_ood_scores_odin(test_loader, net, args.test_bs, ood_num_examples, args.T, args.noise, in_dist=True)
+    in_score, right_score, wrong_score = lib.get_ood_scores_odin(test_loader, net, args.test_bs, ood_num_examples, args.T, args.noise, in_dist=True, dataName = args.InD_Dataset)
 elif args.score == 'M':
     from torch.autograd import Variable
     _, right_score, wrong_score = get_ood_scores(test_loader, in_dist=True)

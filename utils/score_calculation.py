@@ -13,7 +13,7 @@ from scipy import misc
 to_np = lambda x: x.data.cpu().numpy()
 concat = lambda x: np.concatenate(x, axis=0)
 
-def get_ood_scores_odin(loader, net, bs, ood_num_examples, T, noise, in_dist=False):
+def get_ood_scores_odin(loader, net, bs, ood_num_examples, T, noise, in_dist=False, dataName = "MNIST"):
     _score = []
     _right_score = []
     _wrong_score = []
@@ -31,7 +31,7 @@ def get_ood_scores_odin(loader, net, bs, ood_num_examples, T, noise, in_dist=Fal
         # output = net(data)
         # smax = to_np(F.softmax(output, dim=1))
 
-        odin_score = ODIN(data, output,net, T, noise)
+        odin_score = ODIN(data, output,net, T, noise, dataName)
         _score.append(-np.max(odin_score, 1))
 
         if in_dist:
@@ -49,7 +49,7 @@ def get_ood_scores_odin(loader, net, bs, ood_num_examples, T, noise, in_dist=Fal
         return concat(_score)[:ood_num_examples].copy()
 
 
-def ODIN(inputs, outputs, model, temper, noiseMagnitude1):
+def ODIN(inputs, outputs, model, temper, noiseMagnitude1, dataName = "MNIST"):
     # Calculating the perturbation we need to add, that is,
     # the sign of gradient of cross entropy loss w.r.t. input
     criterion = nn.CrossEntropyLoss()
@@ -66,10 +66,19 @@ def ODIN(inputs, outputs, model, temper, noiseMagnitude1):
     # Normalizing the gradient to binary in {0, 1}
     gradient =  torch.ge(inputs.grad.data, 0)
     gradient = (gradient.float() - 0.5) * 2
+
+    if dataName == "Cifar_10":
+            gradient[0][0] = (gradient[0][0])/(63.0/255.0)
+            gradient[0][1] = (gradient[0][1])/(62.1/255.0)
+            gradient[0][2] = (gradient[0][2])/(66.7/255.0)
+    elif dataName == "MNIST":
+        gradient[0][0] = (gradient[0][0])/(0.3081)
+    elif dataName == "FashionMNIST":
+        gradient[0][0] = (gradient[0][0])/(0.3530)
     
-    gradient[:,0] = (gradient[:,0] )/(63.0/255.0)
-    gradient[:,1] = (gradient[:,1] )/(62.1/255.0)
-    gradient[:,2] = (gradient[:,2] )/(66.7/255.0)
+    # gradient[:,0] = (gradient[:,0] )/(63.0/255.0)
+    # gradient[:,1] = (gradient[:,1] )/(62.1/255.0)
+    # gradient[:,2] = (gradient[:,2] )/(66.7/255.0)
     #gradient.index_copy_(1, torch.LongTensor([0]).cuda(), gradient.index_select(1, torch.LongTensor([0]).cuda()) / (63.0/255.0))
     #gradient.index_copy_(1, torch.LongTensor([1]).cuda(), gradient.index_select(1, torch.LongTensor([1]).cuda()) / (62.1/255.0))
     #gradient.index_copy_(1, torch.LongTensor([2]).cuda(), gradient.index_select(1, torch.LongTensor([2]).cuda()) / (66.7/255.0))
