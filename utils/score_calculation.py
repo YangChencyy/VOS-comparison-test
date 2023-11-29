@@ -10,6 +10,7 @@ import torchvision.transforms as transforms
 import numpy as np
 from scipy import misc
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 to_np = lambda x: x.data.cpu().numpy()
 concat = lambda x: np.concatenate(x, axis=0)
 
@@ -22,7 +23,7 @@ def get_ood_scores_odin(loader, net, bs, ood_num_examples, T, noise, in_dist=Fal
     for batch_idx, (data, target) in enumerate(loader):
         if batch_idx >= ood_num_examples // bs and in_dist is False:
             break
-        data = data.cuda()
+        data = data.to(device)
         data = Variable(data, requires_grad = True)
 
         output, smax = net(data)
@@ -59,7 +60,7 @@ def ODIN(inputs, outputs, model, temper, noiseMagnitude1, dataName = "MNIST"):
     # Using temperature scaling
     outputs = outputs / temper
 
-    labels = Variable(torch.LongTensor(maxIndexTemp).cuda())
+    labels = Variable(torch.LongTensor(maxIndexTemp).to(device))
     loss = criterion(outputs, labels)
     loss.backward()
 
@@ -90,7 +91,7 @@ def ODIN(inputs, outputs, model, temper, noiseMagnitude1, dataName = "MNIST"):
             outputs = model(Variable(tempInputs))
     else:
         _, outputs = model(Variable(tempInputs))
-        
+
     outputs = outputs / temper
     # Calculating the confidence after adding perturbations
     nnOutputs = outputs.data.cpu()
@@ -100,7 +101,7 @@ def ODIN(inputs, outputs, model, temper, noiseMagnitude1, dataName = "MNIST"):
 
     return nnOutputs
 
-def get_Mahalanobis_score(model, test_loader, num_classes, sample_mean, precision, layer_index, magnitude, num_batches, in_dist=False):
+def get_Mahalanobis_score(model, test_loader, num_classes, sample_mean, precision, layer_index, magnitude, num_batches, in_dist=False, dataName = "MNIST"):
     '''
     Compute the proposed Mahalanobis confidence score on input dataset
     return: Mahalanobis score from layer_index
@@ -112,7 +113,7 @@ def get_Mahalanobis_score(model, test_loader, num_classes, sample_mean, precisio
         if batch_idx >= num_batches and in_dist is False:
             break
         
-        data, target = data.cuda(), target.cuda()
+        data, target = data.to(device), target.to(device)
         data, target = Variable(data, requires_grad = True), Variable(target)
         
         out_features = model.intermediate_forward(data, layer_index)
@@ -141,9 +142,17 @@ def get_Mahalanobis_score(model, test_loader, num_classes, sample_mean, precisio
          
         gradient =  torch.ge(data.grad.data, 0)
         gradient = (gradient.float() - 0.5) * 2
-        gradient.index_copy_(1, torch.LongTensor([0]).cuda(), gradient.index_select(1, torch.LongTensor([0]).cuda()) / (63.0/255.0))
-        gradient.index_copy_(1, torch.LongTensor([1]).cuda(), gradient.index_select(1, torch.LongTensor([1]).cuda()) / (62.1/255.0))
-        gradient.index_copy_(1, torch.LongTensor([2]).cuda(), gradient.index_select(1, torch.LongTensor([2]).cuda()) / (66.7/255.0))
+        # gradient.index_copy_(1, torch.LongTensor([0]).cuda(), gradient.index_select(1, torch.LongTensor([0]).cuda()) / (63.0/255.0))
+        # gradient.index_copy_(1, torch.LongTensor([1]).cuda(), gradient.index_select(1, torch.LongTensor([1]).cuda()) / (62.1/255.0))
+        # gradient.index_copy_(1, torch.LongTensor([2]).cuda(), gradient.index_select(1, torch.LongTensor([2]).cuda()) / (66.7/255.0))
+        if dataName == "Cifar_10":
+            gradient.index_copy_(1, torch.LongTensor([0]).to(device), gradient.index_select(1, torch.LongTensor([0]).to(device)) / (0.2023))
+            gradient.index_copy_(1, torch.LongTensor([1]).to(device), gradient.index_select(1, torch.LongTensor([1]).to(device)) / (0.1994))
+            gradient.index_copy_(1, torch.LongTensor([2]).to(device), gradient.index_select(1, torch.LongTensor([2]).to(device)) / (0.2010))
+        elif dataName == "MNIST":
+            gradient.index_copy_(1, torch.LongTensor([0]).to(device), gradient.index_select(1, torch.LongTensor([0]).to(device)) / (0.3081))
+        elif dataName == "FashionMNIST":
+            gradient.index_copy_(1, torch.LongTensor([0]).to(device), gradient.index_select(1, torch.LongTensor([0]).to(device)) / (0.3530))
         
         tempInputs = torch.add(data.data, -magnitude, gradient)
         with torch.no_grad():
@@ -188,7 +197,7 @@ def sample_estimator(model, num_classes, feature_list, train_loader):
     
     for data, target in train_loader:
         total += data.size(0)
-        data = data.cuda()
+        data = data.to(device)
         data = Variable(data, volatile=True)
         output, out_features = model.feature_list(data)
         
@@ -199,7 +208,7 @@ def sample_estimator(model, num_classes, feature_list, train_loader):
             
         # compute the accuracy
         pred = output.data.max(1)[1]
-        equal_flag = pred.eq(target.cuda()).cpu()
+        equal_flag = pred.eq(target.to(device)).cpu()
         correct += equal_flag.sum()
         
         # construct the sample matrix
@@ -221,7 +230,7 @@ def sample_estimator(model, num_classes, feature_list, train_loader):
     sample_class_mean = []
     out_count = 0
     for num_feature in feature_list:
-        temp_list = torch.Tensor(num_classes, int(num_feature)).cuda()
+        temp_list = torch.Tensor(num_classes, int(num_feature)).to(device)
         for j in range(num_classes):
             temp_list[j] = torch.mean(list_features[out_count][j], 0)
         sample_class_mean.append(temp_list)
@@ -240,7 +249,7 @@ def sample_estimator(model, num_classes, feature_list, train_loader):
         # find inverse            
         group_lasso.fit(X.cpu().numpy())
         temp_precision = group_lasso.precision_
-        temp_precision = torch.from_numpy(temp_precision).float().cuda()
+        temp_precision = torch.from_numpy(temp_precision).float().to(device)
         precision.append(temp_precision)
         
     print('\n Training Accuracy:({:.2f}%)\n'.format(100. * correct / total))

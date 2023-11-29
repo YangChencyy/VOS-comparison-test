@@ -240,7 +240,7 @@ elif args.score == 'M':
 
     print('get sample mean and covariance', count)
     sample_mean, precision = lib.sample_estimator(net, num_classes, feature_list, train_loader) 
-    in_score = lib.get_Mahalanobis_score(net, test_loader, num_classes, sample_mean, precision, count-1, args.noise, num_batches, in_dist=True)
+    in_score = lib.get_Mahalanobis_score(net, test_loader, num_classes, sample_mean, precision, count-1, args.noise, num_batches, in_dist=True, dataName = args.InD_Dataset)
     print(in_score[-3:], in_score[-103:-100])
 else:
     in_score, right_score, wrong_score = get_ood_scores(test_loader, in_dist=True)
