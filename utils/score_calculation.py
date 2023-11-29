@@ -25,8 +25,11 @@ def get_ood_scores_odin(loader, net, bs, ood_num_examples, T, noise, in_dist=Fal
         data = data.cuda()
         data = Variable(data, requires_grad = True)
 
-        output = net(data)
+        output, smax = net(data)
+        output = smax
         smax = to_np(F.softmax(output, dim=1))
+        # output = net(data)
+        # smax = to_np(F.softmax(output, dim=1))
 
         odin_score = ODIN(data, output,net, T, noise)
         _score.append(-np.max(odin_score, 1))
