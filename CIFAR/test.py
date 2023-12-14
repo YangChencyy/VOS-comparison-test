@@ -109,7 +109,7 @@ if args.InD_Dataset == 'Cifar_10':
 
     net = Cifar_10_Net(BasicBlock, [2, 2, 2, 2], dim_f = 32)
 
-    state_dict = torch.load(args.InD_Dataset + "_net.pt")
+    state_dict = torch.load(args.InD_Dataset + '_32' + "_net.pt")
     net.load_state_dict(state_dict)
 
 
