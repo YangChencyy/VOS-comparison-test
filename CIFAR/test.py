@@ -107,7 +107,7 @@ train_set, test_data, train_loader, test_loader = data_dic[args.InD_Dataset](bat
 net = None
 if args.InD_Dataset == 'Cifar_10':
 
-    net = Cifar_10_Net(BasicBlock, [2, 2, 2, 2], dim_f = args.f_size)
+    net = Cifar_10_Net(BasicBlock, [2, 2, 2, 2], dim_f = 32)
 
     state_dict = torch.load(args.InD_Dataset + "_net.pt")
     net.load_state_dict(state_dict)
