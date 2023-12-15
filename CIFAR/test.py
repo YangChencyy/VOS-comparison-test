@@ -184,8 +184,8 @@ def get_ood_scores(loader, in_dist=False):
 
             data = data.to(device)
 
-            output, smax = net(data)
-            output = smax
+            _, output = net(data)
+            smax = to_np(F.softmax(output, dim=1))
             smax = to_np(smax)
             # smax = to_np(F.softmax(output, dim=1))
 
