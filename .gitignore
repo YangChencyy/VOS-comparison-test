@@ -3,3 +3,4 @@ __pycache__/
 CIFAR/data
 CIFAR/MNIST_net.pt
 CIFAR/FashionMNIST_net.pt
+CIFAR/Cifar_10_*
