@@ -16,4 +16,6 @@ cp /home/rivachen/OOD_Learning_with_GP_boundaries-/MNIST_32_net.pt /home/rivache
 cp /home/rivachen/OOD_Learning_with_GP_boundaries-/Cifar_10_32_net.pt /home/rivachen/VOS-comparison-test/CIFAR/
 Cifar_10:
 python test.py --InD_Dataset Cifar_10 --method_name Softmax_score > cifar_result_smax.txt
-python test.py --InD_Dataset Cifar_10  --method_name Energy --score energy > cifar_result_energy.txt
+python test.py --InD_Dataset Cifar_10 --method_name Energy --score energy > cifar_result_energy.txt
+
+python test.py --InD_Dataset Cifar_10 --method_name ODIN --score Odin --T 100 --noise 0.002
