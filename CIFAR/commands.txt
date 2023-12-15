@@ -19,3 +19,4 @@ python test.py --InD_Dataset Cifar_10 --method_name Softmax_score > cifar_result
 python test.py --InD_Dataset Cifar_10 --method_name Energy --score energy > cifar_result_energy.txt
 
 python test.py --InD_Dataset Cifar_10 --method_name ODIN --score Odin --T 100 --noise 0.002
+python test.py --InD_Dataset Cifar_10 --method_name Mahalanobis --score M --noise 0.01 -v
