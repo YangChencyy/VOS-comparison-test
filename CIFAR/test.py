@@ -184,15 +184,14 @@ def get_ood_scores(loader, in_dist=False):
 
             _, output = net(data)
             smax = to_np(F.softmax(output, dim=1))
-            output = to_np(output)
+            # output = to_np(output)
 
             # smax = to_np(F.softmax(output, dim=1))
 
             if args.use_xent:
                 _score.append(to_np((output.mean(1) - torch.logsumexp(output, dim=1))))
             else:
-                if args.score == 'energy':
-                    
+                if args.score == 'energy':        
                     _score.append(-to_np((args.T*torch.logsumexp(output / args.T, dim=1))))
                 else: # original MSP and Mahalanobis (but Mahalanobis won't need this returned)
                     # print(smax.shape)
