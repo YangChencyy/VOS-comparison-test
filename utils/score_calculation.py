@@ -125,7 +125,7 @@ def get_Mahalanobis_score(model, test_loader, num_classes, sample_mean, precisio
         gaussian_score = 0
         for i in range(num_classes):
             batch_sample_mean = sample_mean[layer_index][i]
-            print(out_features.data.shape, batch_sample_mean.shape)
+            # print(out_features.data.shape, batch_sample_mean.shape)
             zero_f = out_features.data - batch_sample_mean
             term_gau = -0.5*torch.mm(torch.mm(zero_f, precision[layer_index]), zero_f.t()).diag()
             if i == 0:
