@@ -111,11 +111,9 @@ if args.InD_Dataset == 'Cifar_10':
 
     state_dict = torch.load(args.InD_Dataset + '_32' + "_net.pt")
     net.load_state_dict(state_dict)
-
-
 else:
     net = data_model[args.InD_Dataset]()
-    net.load_state_dict(torch.load(args.InD_Dataset + '_net.pt'))
+    net.load_state_dict(torch.load(args.InD_Dataset + '_32' + '_net.pt'))
 
 
 # # Create model
