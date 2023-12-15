@@ -497,18 +497,8 @@ class Cifar_10_Net(nn.Module):
             x = self.layer4(x)
             x = self.avgpool(x)
             x = x.reshape(x.size(0), -1)
-            f = self.fc(x)
-        elif layer_index == 8:
-            x = self.maxpool(self.relu(self.bn1(x)))
-            x = self.layer1(x) 
-            x = self.layer2(x)
-            x = self.layer3(x)
-            x = self.layer4(x)
-            x = self.avgpool(x)
-            x = x.reshape(x.size(0), -1)
             x = self.fc(x)
             x = self.fc2(x)
-
         return x
 
 
