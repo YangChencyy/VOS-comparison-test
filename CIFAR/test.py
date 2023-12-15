@@ -186,7 +186,8 @@ def get_ood_scores(loader, in_dist=False):
 
             _, output = net(data)
             smax = to_np(F.softmax(output, dim=1))
-            smax = to_np(smax)
+            output = to_np(output)
+
             # smax = to_np(F.softmax(output, dim=1))
 
             if args.use_xent:
